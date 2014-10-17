@@ -8,8 +8,8 @@
  * author: Jason Wu
  */
 public class Percolation {
-    public int N;
-    public boolean [][] sites;
+    private int N;
+    private boolean [][] sites;
     private WeightedQuickUnionUF sitesUF;
     private WeightedQuickUnionUF auxUF; // needed to prevent backwash
     

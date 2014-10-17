@@ -9,8 +9,8 @@
  * author: Jason Wu
  */
 public class PercolationStats {
-    public int N;
-    public int T;
+    private int N;
+    private int T;
     private Percolation perc;
     private double [] x; // estimation of mean/fraction.
     
