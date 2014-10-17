@@ -1,3 +1,13 @@
+/*
+ * PercolationStats.class
+ * 
+ * Usage: java PercolationStats <N> <T> <file>
+ * Initializes a Percolation grid of size N x N.
+ * Repeats percolation experiment T times and calculates the mean,
+ * standard deviation, and confidence interval for percoluation to occur.
+ * 
+ * author: Jason Wu
+ */
 public class PercolationStats {
     public int N;
     public int T;

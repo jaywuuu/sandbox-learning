@@ -1,7 +1,18 @@
+/*
+ * Percolation.class
+ * 
+ * Model structure for simulating percolation in systems.
+ * Constructor accepts integer N to initialize a grid of N x N blocked
+ * sites.  
+ * 
+ * author: Jason Wu
+ */
 public class Percolation {
     public int N;
     public boolean [][] sites;
     private WeightedQuickUnionUF sitesUF;
+    private WeightedQuickUnionUF auxUF; // needed to prevent backwash
+    
     
     public Percolation(int N) {
         // Throw exception if N is <= 0
@@ -22,9 +33,15 @@ public class Percolation {
         // sites connected to the top or bottom.
         // N^2 is associated with an open top site.
         // N^2+1 is associated with an open bottom site.
-        // Note: backwash is due to virtual bottom site connected to
-        // all bottom sites.  
-        sitesUF = new WeightedQuickUnionUF(N*N+2);
+        // **Note: backwash is due to virtual bottom site connected to
+        // all bottom sites.  So, in this case, to prevent backwashing
+        // (when isFull returns true) we'll use a second UF object to keep
+        // track of sites only connected to the top virtual site.  
+        // I can't think of another way to do this without using a for loop
+        // to check whether a new union results in a component with a site
+        // on the bottom row.
+        sitesUF = new WeightedQuickUnionUF(gridSize()+2);
+        auxUF = new WeightedQuickUnionUF(gridSize()+1);
     }
     
     // In hindsight, it may have been easier to have extra rows and columns
@@ -48,24 +65,23 @@ public class Percolation {
             if (i > 1) {
                 if (this.isOpen(i-1, j)) {
                     sitesUF.union(xyTo1D(i, j), xyTo1D(i-1,j));
+                    auxUF.union(xyTo1D(i, j), xyTo1D(i-1,j));
                 }
             }
             // If top row, connectto N^2 element (root of top open sites).
             else {
                 sitesUF.union(xyTo1D(i, j), gridSize());
+                auxUF.union(xyTo1D(i, j), gridSize());
             }
             
             // Below
             if (i < N) {
                 if (this.isOpen(i+1, j)) {
                     sitesUF.union(xyTo1D(i, j), xyTo1D(i+1,j));
+                    auxUF.union(xyTo1D(i, j), xyTo1D(i+1,j));
                 }
             }
-            // If bottom row, connect to N^2+1 element 
-            // (root of bottom open sites).
-            // Only connect to virtual site if the current site being
-            // opened is already full.  This will prevent backwashing
-            // from occuring.
+            // If this is the bottom row, connect to N^2+1 element
             else {
                  sitesUF.union(xyTo1D(i, j), gridSize()+1);
             }
@@ -74,6 +90,7 @@ public class Percolation {
             if (j > 1) {
                 if (this.isOpen(i, j-1)) {
                     sitesUF.union(xyTo1D(i, j), xyTo1D(i,j-1));
+                    auxUF.union(xyTo1D(i, j), xyTo1D(i,j-1));
                 }
             }
             
@@ -81,6 +98,7 @@ public class Percolation {
             if (j < N) {
                 if (this.isOpen(i, j+1)) {
                     sitesUF.union(xyTo1D(i, j), xyTo1D(i,j+1));
+                    auxUF.union(xyTo1D(i, j), xyTo1D(i,j+1));
                 }
             }
         }
@@ -108,9 +126,9 @@ public class Percolation {
         if (j < 1 | j > N+1) throw new 
             IndexOutOfBoundsException("Index j out of bounds.");
         
-        if (sitesUF.connected(xyTo1D(i,j), gridSize())) return true;
-        
-        return false;
+        // Cross reference with auxillary UF structure.
+        return (sitesUF.connected(xyTo1D(i,j), gridSize()) && 
+                auxUF.connected(xyTo1D(i,j), gridSize()));
     }
     
     public boolean percolates() {
