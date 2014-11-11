@@ -14,9 +14,9 @@ public class Member {
 		
 		for (ListIterator<Member> it = friends.listIterator(); it.hasNext(); ) {
 			String name = it.next().name;
-			StdOut.print(name + ", ");
+			System.out.print(name + ", ");
 		}
-		StdOut.println();
+		System.out.println();
 		
 		// recurse
 		for (ListIterator<Member> it = friends.listIterator(); it.hasNext(); ) {
